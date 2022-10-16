@@ -113,45 +113,32 @@
           class="flex w-full items-center justify-start border-b py-2 px-4 leading-tight"
         >
           <TIcon name="ticket" class="mr-4 h-4 w-4" />
-          <div>{{ doc.price }}</div>
+          <div class="flex w-full justify-between">
+            <div>{{ doc.price }}</div>
+            <TButton
+              v-if="doc.link"
+              type="link"
+              class="text-primary text-sm"
+              allow-guests
+              :href="doc.link"
+              target="_blank"
+              >Buy Ticket</TButton
+            >
+          </div>
         </div>
       </div>
     </div>
 
     <div
-      class="sticky bottom-0 z-50 flex justify-center gap-2 border-b bg-white p-4"
+      class="sticky bottom-0 z-50 flex justify-center items-center gap-2 border-b bg-white p-4"
     >
       <TReaction
-        label="Save"
-        toggled-label="Saved"
+        label="Attend"
+        toggled-label="Attending"
         field="star"
-        icon="BookmarkIcon"
         class="rounded-full"
         :item="doc"
       />
-      <TButton
-        v-if="uid && item.response === 'up'"
-        type="secondary"
-        @click="ticketPopup = true"
-        >View Ticket</TButton
-      >
-      <TButton
-        v-else-if="doc.link"
-        type="primary"
-        :title="$t('eventView.reservation.guest')"
-        allow-guests
-        :href="doc.link"
-        target="_blank"
-        >Buy Ticket</TButton
-      >
-      <TButton
-        v-else
-        type="primary"
-        :title="$t('eventView.reservation.guest')"
-        @click="reservationPopup = 'reserve'"
-        >Get Ticket</TButton
-      >
-
       <TButton
         allow-guests
         icon="share"
@@ -233,7 +220,27 @@
       </div>
     </TPopup>
 
-    <TPreview :content="doc.description" class="p-4" />
+    <TExpand class="p-4">
+      <TPreview :content="doc.description" />
+    </TExpand>
+
+    <div v-if="doc.venue && doc.venue.map" class="bg-gray-100 p-4">
+      <div class="mb-4 text-sm font-bold leading-none text-gray-700">
+        {{ $t('eventView.venueMap') }}
+      </div>
+      <img :src="doc.venue.map" alt="Venue Map" class="mt-4" />
+    </div>
+
+    <TAgenda
+      v-if="item.id === 'tN7O5UvdVZLmZ0BHlawc'"
+      :events="program"
+      class="w-full space-y-2 p-4"
+    />
+
+    <div v-if="doc.org" class="space-y-2 p-4">
+      <h4 class="text-xl font-bold">{{ $t('event.organiser') }}</h4>
+      <WProfile :username="doc.org.username" :fallback="doc.org" />
+    </div>
 
     <div v-if="doc.artists && doc.artists.length" class="space-y-2 p-4">
       <h3 class="text-xl font-bold">{{ $t('event.artists') }}</h3>
@@ -249,23 +256,12 @@
       </div>
     </div>
 
-    <div v-if="doc.venue && doc.venue.map" class="bg-gray-100 p-4">
-      <div class="mb-4 text-sm font-bold leading-none text-gray-700">
-        {{ $t('eventView.venueMap') }}
-      </div>
-      <img :src="doc.venue.map" alt="Venue Map" class="mt-4" />
-    </div>
-
-    <div v-if="doc.org" class="space-y-2 p-4">
-      <h4 class="text-xl font-bold">{{ $t('event.organiser') }}</h4>
-      <WProfile :username="doc.org.username" :fallback="doc.org" full />
-    </div>
-
     <div v-if="doc.star && doc.star.list" class="space-y-2 p-4">
       <h3 class="text-xl font-bold">Guests</h3>
       <div v-for="(val, username) in doc.star.list" :key="`guest-${username}`">
         <WProfile :username="username" />
       </div>
+      <div v-if="!doc.star.count">There are no other guests yet.</div>
     </div>
 
     <div class="m-4 text-xs text-right gap-8">
@@ -385,6 +381,51 @@ export default {
   data: () => ({
     comment: '',
     announcementPopupVisible: false,
+    program: [
+      {
+        startDate: '2022-10-15 20:00',
+        endDate: '2022-10-15 21:00',
+        eventType: 'Workshop',
+        name: 'Choreographie - Lady & Man Styling',
+        description: '',
+        artists: [
+          {
+            username: 'damir_mona',
+            name: 'Damir & Mona',
+          },
+        ],
+      },
+      {
+        startDate: '2022-10-15 21:00',
+        endDate: '2022-10-15 22:00',
+        eventType: 'Workshop',
+        name: 'Urbankiz (Open Level)',
+        description: '',
+        artists: [
+          {
+            username: 'damir_mona',
+            name: 'Damir & Mona',
+          },
+        ],
+      },
+      {
+        startDate: '2022-10-15 22:00',
+        endDate: '2022-10-16 04:00',
+        eventType: 'Party',
+        name: 'Party All Night Long',
+        description: '',
+        artists: [
+          {
+            username: 'MingaKizz',
+            name: 'Bobby SweetKiz (Dj Longchamp)',
+          },
+          {
+            username: 'raymdtc',
+            name: 'Charley Raymdtc',
+          },
+        ],
+      },
+    ],
   }),
   computed: {
     publishedAt() {
